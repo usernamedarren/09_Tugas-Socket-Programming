@@ -21,7 +21,7 @@ def handle_client(server_socket):
             else:
                 # Pesan pertama harus password, jika tidak sesuai, abaikan client
                 if decoded_message == password:
-                    server_socket.sendto("Password diterima, masukkan username:".encode(), client_address)
+                    server_socket.sendto("Password diterima!".encode(), client_address)
                     username, _ = server_socket.recvfrom(1024)
                     username = username.decode().strip()
 
