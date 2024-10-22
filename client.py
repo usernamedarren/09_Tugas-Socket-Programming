@@ -1,17 +1,52 @@
 import tkinter as tk
-from tkinter import simpledialog, messagebox, scrolledtext
+from tkinter import simpledialog, messagebox
 import socket
 import threading
+
+# Fungsi untuk membuat pesan dengan border bulat
+def create_message_bubble(chat_area, username, message, align_right=False):
+    # Create a frame for the message bubble
+    bubble_frame = tk.Frame(chat_area, bg="#ECE5DD", bd=1, relief="solid", padx=10, pady=5)
+    
+    # Create a label for the username
+    username_label = tk.Label(bubble_frame, text=username, bg="#ECE5DD", fg="#25D366", font=("Helvetica", 12))
+    username_label.pack(anchor='e' if align_right else 'w')  # Align username based on message direction
+
+    # Create a label for the message text
+    message_label = tk.Label(bubble_frame, text=message, bg="#ECE5DD", wraplength=250, justify='left', font=("Helvetica", 12))
+    message_label.pack(anchor='e' if align_right else 'w')  # Align message based on direction
+
+    # Add the bubble frame to the chat area
+    chat_area.config(state=tk.NORMAL)
+    chat_area.window_create(tk.END, window=bubble_frame)
+    chat_area.insert(tk.END, '\n')  # Add some spacing
+    chat_area.config(state=tk.DISABLED)
 
 # Fungsi terima pesan
 def receive_messages(client_socket, chat_area):
     while True:
         try:
             message, _ = client_socket.recvfrom(1024)
-            chat_area.config(state=tk.NORMAL)  # Membuat area chat bisa diedit sementara
-            chat_area.insert(tk.END, f"\nServer: {message.decode()}\n")  # Tambah pesan dari server
-            chat_area.config(state=tk.DISABLED)  # Kunci area chat, tidak bisa diedit
-            chat_area.yview(tk.END)  # Scroll otomatis ke chat yang baru
+            decoded_message = message.decode()
+
+            # Check for join notifications
+            if "telah bergabung ke chatroom" in decoded_message:
+                chat_area.config(state=tk.NORMAL)
+                chat_area.insert(tk.END, f"\n{decoded_message}\n")  # Insert without "Server:"
+                chat_area.config(state=tk.DISABLED)
+            else:
+                # Format the message to show "<username>: <message>"
+                username_message = decoded_message.split(': ', 1)  # Split only on the first ':'
+                if len(username_message) == 2:
+                    username, user_message = username_message
+                    create_message_bubble(chat_area, username, user_message, align_right=True)  # Right-align received messages
+                else:
+                    # In case of malformed message
+                    chat_area.config(state=tk.NORMAL)
+                    chat_area.insert(tk.END, f"\n{decoded_message}\n")  # Display as is
+                    chat_area.config(state=tk.DISABLED)
+
+            chat_area.yview(tk.END)  # Scroll automatically to the new chat
         except Exception as e:
             print(f"Kesalahan saat menerima pesan: {e}")
             break
@@ -25,14 +60,10 @@ def send_message(client_socket, entry_message, chat_area, server_ip, server_port
     if message.strip().lower() == "exit":
         client_socket.close()
         return
-    #else:
     client_socket.sendto(message.encode(), (server_ip, server_port))
 
-    # Bubble chat
-    chat_area.config(state=tk.NORMAL)
-    chat_area.insert(tk.END, f"\nYou: {message}\n")
-    chat_area.config(state=tk.DISABLED)
-    chat_area.yview(tk.END)
+    # Bubble chat for the user's own message
+    create_message_bubble(chat_area, "You", message, align_right=False)  # Left-align user messages
     entry_message.delete(0, tk.END)
 
 def start_client():
@@ -47,7 +78,7 @@ def start_client():
     top_label.pack(pady=10)
 
     # Area chat (scrollable)
-    chat_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, font=("Helvetica", 12), bg="#ECE5DD")
+    chat_area = tk.Text(root, wrap=tk.WORD, font=("Helvetica", 12), bg="#ECE5DD")
     chat_area.config(state=tk.DISABLED)  # Area chat hanya untuk tampilan
     chat_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
