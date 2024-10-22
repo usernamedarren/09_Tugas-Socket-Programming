@@ -3,15 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UDP Chatroom</title>
+    <title>AkuTauDiaTau</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="chat-container">
-        <div id="chat-box" class="chat-box"></div>
-        <input type="text" id="message-input" placeholder="Type your message here...">
-        <button onclick="sendMessage()">Send</button>
+        <!-- Bagian header dengan tab profil dan tab lain -->
+        <div class="header">
+        <!-- Tab profil -->
+            <div class="profile-tab">
+                <img src="gambar2.jpg" alt="Profile Picture">
+                <span class="profile-name">Ultraman gendut</span>
+            </div>   
+        </div>
+        
+        <!-- Area chat -->
+        <div class="chat-box">
+        <!-- Chat messages akan ditampilkan di sini -->
+        </div>
+
+        <!-- Input pesan dan tombol kirim -->
+        <div class="input-container">
+            <input type="text" id="message-input" placeholder="Ketik pesan disini...">
+            <button>➤</button>
+        </div>
     </div>
+    
 
     <script>
         const socket = new WebSocket("ws://localhost:8000");

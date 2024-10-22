@@ -1,6 +1,10 @@
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  background-image: url('background3.jpg');
+  background-size: cover;
+  font-family: "Helvetica Neue", sans-serif;
+  background-position: bottom;
+  background-repeat: no-repeat;
+  background-color: #27534e;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -9,33 +13,112 @@ body {
 }
 
 .chat-container {
-  width: 300px;
-  background-color: white;
+  width: 700px;
+  background-color: #163834;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
+
+.chat-box::-webkit-scrollbar {
+  width: 8px; /* Lebar scrollbar */
+}
+
+/* Warna track scrollbar (bagian latar) */
+.chat-box::-webkit-scrollbar-track {
+  background: #27534e;
+  border-radius: 10px;
+}
+
+/* Warna handle scrollbar (bagian yang bisa digeser) */
+.chat-box::-webkit-scrollbar-thumb {
+  background-color: #27534e;
+  border-radius: 10px;
+  border: 2px solid #163834; /* Memberi padding atau jarak antara handle dan track */
+}
+
+/* Saat hover di atas scrollbar */
+.chat-box::-webkit-scrollbar-thumb:hover {
+  background-color: #27534e;
+}
+
 .chat-box {
-  height: 200px;
+  height: 450px;
   overflow-y: scroll;
-  border: 1px solid #ddd;
+  border: 1px solid #10291e;
   margin-bottom: 10px;
   padding: 10px;
 }
 
-#message-input {
-  width: calc(100% - 60px);
+/* Container untuk bagian atas termasuk tab profil */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 10px;
-  border: 1px solid #ddd;
+  background-color: #163834;
+  color: rgb(255, 255, 255);
+  border-radius: 10px 10px 0 0; /* Membuat sudut atas melengkung */
+  margin-bottom: 10px;
+}
+
+/* Tab profil */
+.profile-tab {
+  display: flex;
+  align-items: center;
+}
+
+.profile-tab img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.profile-tab .profile-name {
+  font-weight: bold;
+}
+
+.tabs {
+  display: flex;
+}
+
+.tab {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #128C7E;
+  color: rgb(255, 255, 255);
   border-radius: 5px;
+  margin-left: 5px;
+}
+
+.tab:hover {
+  background-color: #199c8c;
+}
+
+/* Container untuk input dan tombol */
+.input-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+#message-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #10291e;
+  border-radius: 5px;
+  margin-right: 10px; /* Jarak antara input dan tombol */
 }
 
 button {
   padding: 10px 20px;
-  background-color: #28a745;
-  color: white;
-  border: none;
+  background-color: #27534e;
+  color: rgb(255, 255, 255);
+  border: 1px solid #10291e;
   border-radius: 5px;
   cursor: pointer;
+  flex-shrink: 0; /* Mencegah tombol mengecil */
 }
