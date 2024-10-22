@@ -32,8 +32,6 @@ def send_message(client_socket, entry_message, chat_area, server_ip, server_port
     chat_area.yview(tk.END)
     entry_message.delete(0, tk.END)
 
-def on_enter(event, client_socket, entry_message, server_ip, server_port):
-    send_message(client_socket, entry_message, server_ip, server_port)
 def start_client():
     root = tk.Tk() #Membuat jendela GUI
     root.title("AkuTauDiaTau Private Chat Room")
@@ -58,7 +56,7 @@ def start_client():
     entry_message.pack(side=tk.LEFT, padx=10, pady=10)
 
     button_send = tk.Button(bottom_frame, text="Send", bg="#25D366", fg="white",
-                            font=("Helvetica", 14), command=lambda: send_message(client_socket, entry_message, chat_area, server_ip, server_port))
+    font=("Helvetica", 14), command=lambda: send_message(client_socket, entry_message, chat_area, server_ip, server_port))
     button_send.pack(side=tk.RIGHT, padx=10, pady=10)
     
     server_ip = "127.0.0.1" #buat socket
@@ -80,33 +78,12 @@ def start_client():
         if not username:
             messagebox.showerror("Error", "Username tidak boleh kosong!")
             return
-        root = tk.Tk() #Membuat jendela GUI
-        root.title(f"{username} box")
         client_socket.sendto(username.encode(), (server_ip, server_port)) #kirim username
-        
-
-        # Kirim pesan ke server
-        text_area = tk.Text(root, height=20, width=50)
-        text_area.pack(pady=10)
-        
-        # Input field untuk pesan
-        entry_message = tk.Entry(root, width=50)
-        entry_message.pack(side=tk.LEFT, padx=10, pady=10)
-        entry_message.bind("<Return>", lambda event: on_enter(event, client_socket, entry_message, server_ip, server_port))
-        
-        # Tombol kirim
-        button_send = tk.Button(root, text="Kirim", command=lambda: send_message(client_socket, entry_message, server_ip, server_port))
-        button_send.pack(side=tk.RIGHT, padx=10, pady=10)
-        while True:
-            message = input()
-            if message.strip().lower() == "exit":
-                break
-            client_socket.sendto(message.encode(), (server_ip, server_port))
-        
+       
         threading.Thread(target=receive_messages, args=(client_socket,), daemon=True).start()
         root.mainloop()
     else:
-        messagebox.showerror("[ERROR]", "Password salah, koneksi ditolak.")
+        messagebox.showerror("Error", "Password salah, koneksi ditolak.")
         client_socket.close()
 
 

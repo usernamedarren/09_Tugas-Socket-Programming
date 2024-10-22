@@ -3,7 +3,7 @@ import threading
 
 # Global variables
 clients = {}
-password = "chatpassword"  # Password yang harus dimasukkan client
+password = "pass"  # Password yang harus dimasukkan client
 
 def handle_client(server_socket):
     while True:
