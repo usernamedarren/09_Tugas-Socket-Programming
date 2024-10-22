@@ -16,6 +16,9 @@ def receive_messages(client_socket, chat_area):
             print(f"Kesalahan saat menerima pesan: {e}")
             break
 
+def on_enter(event, client_socket, entry_message, chat_area, server_ip, server_port):
+    send_message(client_socket, entry_message, chat_area, server_ip, server_port)
+
 # Fungsi kirim pesan
 def send_message(client_socket, entry_message, chat_area, server_ip, server_port):
     message = entry_message.get()
@@ -24,7 +27,7 @@ def send_message(client_socket, entry_message, chat_area, server_ip, server_port
         return
     #else:
     client_socket.sendto(message.encode(), (server_ip, server_port))
-        #entry_message.delete(0, tk.END)
+
     # Bubble chat
     chat_area.config(state=tk.NORMAL)
     chat_area.insert(tk.END, f"\nYou: {message}\n")
@@ -33,7 +36,7 @@ def send_message(client_socket, entry_message, chat_area, server_ip, server_port
     entry_message.delete(0, tk.END)
 
 def start_client():
-    root = tk.Tk() #Membuat jendela GUI
+    root = tk.Tk()  # Membuat jendela GUI
     root.title("AkuTauDiaTau Private Chat Room")
 
     # Bagian judul
@@ -56,10 +59,10 @@ def start_client():
     entry_message.pack(side=tk.LEFT, padx=10, pady=10)
 
     button_send = tk.Button(bottom_frame, text="Send", bg="#25D366", fg="white",
-    font=("Helvetica", 14), command=lambda: send_message(client_socket, entry_message, chat_area, server_ip, server_port))
+                             font=("Helvetica", 14), command=lambda: send_message(client_socket, entry_message, chat_area, server_ip, server_port))
     button_send.pack(side=tk.RIGHT, padx=10, pady=10)
     
-    server_ip = "127.0.0.1" #buat socket
+    server_ip = "127.0.0.1"  # buat socket
     server_port = 12345
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     
@@ -68,7 +71,7 @@ def start_client():
         messagebox.showerror("Error", "Password tidak boleh kosong!")
         return
     
-    client_socket.sendto(password.encode(), (server_ip, server_port)) #kirim pass ke server
+    client_socket.sendto(password.encode(), (server_ip, server_port))  # kirim pass ke server
     
     # Terima respon password
     response, _ = client_socket.recvfrom(1024)
@@ -78,14 +81,16 @@ def start_client():
         if not username:
             messagebox.showerror("Error", "Username tidak boleh kosong!")
             return
-        client_socket.sendto(username.encode(), (server_ip, server_port)) #kirim username
-       
-        threading.Thread(target=receive_messages, args=(client_socket,), daemon=True).start()
+        client_socket.sendto(username.encode(), (server_ip, server_port))  # kirim username
+        
+        # Bind Enter key to send message
+        entry_message.bind("<Return>", lambda event: on_enter(event, client_socket, entry_message, chat_area, server_ip, server_port))
+        
+        threading.Thread(target=receive_messages, args=(client_socket, chat_area), daemon=True).start()
         root.mainloop()
     else:
         messagebox.showerror("Error", "Password salah, koneksi ditolak.")
         client_socket.close()
-
 
 if __name__ == "__main__":
     start_client()
