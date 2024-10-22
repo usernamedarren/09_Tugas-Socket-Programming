@@ -7,8 +7,8 @@ password = "chatpassword"  # Password yang harus dimasukkan client
 
 def handle_client(server_socket):
     while True:
-        # Terima pesan dari client
         try:
+            # Terima pesan dari client
             message, client_address = server_socket.recvfrom(1024)
             decoded_message = message.decode()
 
@@ -21,19 +21,22 @@ def handle_client(server_socket):
             else:
                 # Pesan pertama harus password, jika tidak sesuai, abaikan client
                 if decoded_message == password:
-                    server_socket.sendto("Password diterima!".encode(), client_address)
+                    server_socket.sendto("Password diterima! Masukkan username:".encode(), client_address)
                     username, _ = server_socket.recvfrom(1024)
                     username = username.decode().strip()
 
                     # Simpan client ke dalam dict
-                    clients[client_address] = username
-                    print(f"Client baru terhubung: {username} ({client_address})")
+                    if username and client_address not in clients:
+                        clients[client_address] = username
+                        print(f"Client baru terhubung: {username} ({client_address})")
 
-                    # Beri tahu semua client tentang client baru
-                    broadcast_message = f"{username} telah bergabung ke chatroom."
-                    for client in clients:
-                        if client != client_address:
-                            server_socket.sendto(broadcast_message.encode(), client)
+                        # Beri tahu semua client tentang client baru
+                        broadcast_message = f"{username} telah bergabung ke chatroom."
+                        for client in clients:
+                            if client != client_address:
+                                server_socket.sendto(broadcast_message.encode(), client)
+                    else:
+                        server_socket.sendto("Username tidak valid!".encode(), client_address)
                 else:
                     server_socket.sendto("Password salah, koneksi ditolak.".encode(), client_address)
 
