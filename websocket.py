@@ -1,22 +1,50 @@
+# server.py
 import asyncio
 import websockets
-import socket
 
-UDP_IP = "127.0.0.1"
-UDP_PORT = 5005
-buffer_size = 1024
+# Configuration
+PASSWORD = "pass"  # Replace with the required password for the chatroom
+connected_clients = set()  # Store the connected clients
 
+# Function to handle client connections
 async def handle_client(websocket, path):
-    async for message in websocket:
-        # Kirim pesan ke server UDP
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.sendto(message.encode('utf-8'), (UDP_IP, UDP_PORT))
-        data, _ = sock.recvfrom(buffer_size)
-        # Kirim balik pesan dari server UDP ke client websocket
-        await websocket.send(data.decode('utf-8'))
+    try:
+        # Ask for a password
+        await websocket.send("Enter the password:")
+        password = await websocket.recv()
 
-# Menjalankan WebSocket server
-start_server = websockets.serve(handle_client, "localhost", 8000)
+        # Check if the password matches
+        if password != PASSWORD:
+            await websocket.send("Invalid password. Connection closed.")
+            return  # Close the connection if the password is incorrect
 
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+        await websocket.send("Welcome to the chatroom!")
+        connected_clients.add(websocket)
+
+        # Listen for incoming messages from the client
+        async for message in websocket:
+            await broadcast(message, websocket)
+    except websockets.ConnectionClosed:
+        print("A client disconnected.")
+    finally:
+        # Remove the client from the set of connected clients
+        connected_clients.remove(websocket)
+
+# Function to broadcast messages to all connected clients except the sender
+async def broadcast(message, sender_websocket):
+    for client in connected_clients:
+        if client != sender_websocket:
+            try:
+                await client.send(message)
+            except websockets.ConnectionClosed:
+                connected_clients.remove(client)
+
+# Main function to start the WebSocket server
+async def main():
+    server = await websockets.serve(handle_client, "localhost", 8000)
+    print("Server started on ws://localhost:8000")
+    await server.wait_closed()
+
+# Run the server
+if __name__ == "__main__":
+    asyncio.run(main())

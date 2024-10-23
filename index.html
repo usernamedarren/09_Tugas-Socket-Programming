@@ -1,50 +1,58 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AkuTauDiaTau</title>
+    <title>AkuTauDiaTau Chatroom</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="chat-container">
-        <!-- Bagian header dengan tab profil dan tab lain -->
         <div class="header">
-        <!-- Tab profil -->
             <div class="profile-tab">
                 <img src="img/gambar2.jpg" alt="Profile Picture">
-                <span class="profile-name">Ultraman gendut</span>
+                <span class="profile-name">Ultraman Gendut</span>
             </div>   
         </div>
         
-        <!-- Area chat -->
-        <div class="chat-box">
-        <!-- Chat messages akan ditampilkan di sini -->
+        <div class="chat-box" id="chat-box">
+            <!-- Chat messages will be displayed here -->
         </div>
 
-        <!-- Input pesan dan tombol kirim -->
         <div class="input-container">
             <input type="text" id="message-input" placeholder="Ketik pesan disini...">
-            <button>➤</button>
+            <button onclick="sendMessage()">➤</button>
         </div>
     </div>
-    
 
     <script>
+        // Connect to the WebSocket server
         const socket = new WebSocket("ws://localhost:8000");
 
-        socket.onmessage = function(event) {
+        // When the connection is open, prompt for the password
+        socket.addEventListener('open', function () {
+            const password = prompt("Enter the chatroom password:");
+            socket.send(password);
+        });
+
+        // Handle incoming messages from the server
+        socket.addEventListener('message', function (event) {
             const chatBox = document.getElementById("chat-box");
             const newMessage = document.createElement("p");
             newMessage.textContent = event.data;
             chatBox.appendChild(newMessage);
-        };
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the latest message
+        });
 
+        // Function to send a message to the server
         function sendMessage() {
             const messageInput = document.getElementById("message-input");
-            const message = messageInput.value;
-            socket.send(message);
-            messageInput.value = "";
+            const message = messageInput.value.trim();
+            if (message !== "") {
+                socket.send(message);
+                messageInput.value = ""; // Clear input field after sending
+            }
         }
     </script>
 </body>

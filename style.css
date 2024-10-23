@@ -1,3 +1,4 @@
+/* style.css */
 body {
   background-image: url('img/background3.jpg');
   background-size: cover;
@@ -17,53 +18,39 @@ body {
   background-color: #163834;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-
-.chat-box::-webkit-scrollbar {
-  width: 8px; /* Lebar scrollbar */
-}
-
-/* Warna track scrollbar (bagian latar) */
-.chat-box::-webkit-scrollbar-track {
-  background: #27534e;
-  border-radius: 10px;
-}
-
-/* Warna handle scrollbar (bagian yang bisa digeser) */
-.chat-box::-webkit-scrollbar-thumb {
-  background-color: #27534e;
-  border-radius: 10px;
-  border: 2px solid #163834; /* Memberi padding atau jarak antara handle dan track */
-}
-
-/* Saat hover di atas scrollbar */
-.chat-box::-webkit-scrollbar-thumb:hover {
-  background-color: #27534e;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
 }
 
 .chat-box {
   height: 450px;
-  overflow-y: scroll;
+  overflow-y: auto;
   border: 1px solid #10291e;
+  background-color: #1b4d45;
   margin-bottom: 10px;
   padding: 10px;
+  border-radius: 5px;
+  color: #ffffff;
 }
 
-/* Container untuk bagian atas termasuk tab profil */
+.chat-box p {
+  margin: 0;
+  padding: 5px;
+  border-radius: 5px;
+  background-color: #2e6a5e;
+  margin-bottom: 5px;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px;
   background-color: #163834;
-  color: rgb(255, 255, 255);
-  border-radius: 10px 10px 0 0; /* Membuat sudut atas melengkung */
+  color: #ffffff;
+  border-radius: 10px 10px 0 0;
   margin-bottom: 10px;
 }
 
-/* Tab profil */
 .profile-tab {
   display: flex;
   align-items: center;
@@ -80,24 +67,6 @@ body {
   font-weight: bold;
 }
 
-.tabs {
-  display: flex;
-}
-
-.tab {
-  padding: 10px;
-  cursor: pointer;
-  background-color: #128C7E;
-  color: rgb(255, 255, 255);
-  border-radius: 5px;
-  margin-left: 5px;
-}
-
-.tab:hover {
-  background-color: #199c8c;
-}
-
-/* Container untuk input dan tombol */
 .input-container {
   display: flex;
   justify-content: space-between;
@@ -106,19 +75,24 @@ body {
 }
 
 #message-input {
-  width: 100%;
+  flex-grow: 1;
   padding: 10px;
   border: 1px solid #10291e;
   border-radius: 5px;
-  margin-right: 10px; /* Jarak antara input dan tombol */
+  margin-right: 10px;
+  background-color: #ffffff;
 }
 
 button {
   padding: 10px 20px;
   background-color: #27534e;
-  color: rgb(255, 255, 255);
-  border: 1px solid #10291e;
+  color: #ffffff;
+  border: none;
   border-radius: 5px;
   cursor: pointer;
-  flex-shrink: 0; /* Mencegah tombol mengecil */
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #1e443e;
 }
