@@ -14,7 +14,6 @@ def handle_client():
     global server_socket
     while is_server_running:
         try:
-            # Receive message from client
             message, client_address = server_socket.recvfrom(1024)
             decoded_message = message.decode()
 
@@ -27,22 +26,27 @@ def handle_client():
             else:
                 # First message must be the password, otherwise ignore the client
                 if decoded_message == server_password:
-                    server_socket.sendto("Password accepted! Please enter your username:".encode(), client_address)
-                    username, _ = server_socket.recvfrom(1024)
-                    username = username.decode().strip()
+                    server_socket.sendto("Password accepted!".encode(), client_address)
 
-                    # Save client to the dict
-                    if username and client_address not in clients:
-                        clients[client_address] = username
-                        update_chat_area(f"New client connected: {username} ({client_address})")
+                    while True:
+                        username, _ = server_socket.recvfrom(1024)
+                        username = username.decode().strip()
 
-                        # Notify all clients about the new client
-                        broadcast_message = f"{username} has joined the chatroom."
-                        for client in clients:
-                            if client != client_address:
-                                server_socket.sendto(broadcast_message.encode(), client)
-                    else:
-                        server_socket.sendto("Invalid username!".encode(), client_address)
+                        # Check if username is already taken
+                        if username in clients.values():
+                            server_socket.sendto("Username already taken, please choose a different one.".encode(), client_address)
+                        else:
+                            # Save client to the dict if username is unique
+                            clients[client_address] = username
+                            server_socket.sendto("Username accepted".encode(), client_address)
+                            update_chat_area(f"New client connected: {username} ({client_address})")
+
+                            # Notify all clients about the new client
+                            broadcast_message = f"{username} has joined the chatroom."
+                            for client in clients:
+                                if client != client_address:
+                                    server_socket.sendto(broadcast_message.encode(), client)
+                            break
                 else:
                     server_socket.sendto("Incorrect password, connection denied.".encode(), client_address)
 

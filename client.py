@@ -7,16 +7,15 @@ def create_message_bubble(chat_area, username, message, align_right=False):
     username_label = tk.Label(
         chat_area,
         text=username,
-        bg="#ECE5DD" if align_right else "#DCF8C6",
+        bg="#DCF8C6" if align_right else "#ECE5DD",
         font=("Helvetica", 12, "bold"),
         padx=10,
         pady=2
     )
-
     message_label = tk.Label(
         chat_area,
         text=message,
-        bg="#ECE5DD" if align_right else "#DCF8C6",
+        bg="#DCF8C6" if align_right else "#ECE5DD",
         wraplength=250,
         justify='right' if align_right else 'left',
         anchor='e' if align_right else 'w',
@@ -24,7 +23,6 @@ def create_message_bubble(chat_area, username, message, align_right=False):
         padx=10,
         pady=5
     )
-
     chat_area.config(state=tk.NORMAL)
     chat_area.window_create(tk.END, window=username_label)
     chat_area.insert(tk.END, '\n')
@@ -94,6 +92,10 @@ def start_client():
                             font=("Helvetica", 14), command=lambda: send_message(client_socket, entry_message, chat_area, server_ip, server_port))
     button_send.pack(side=tk.RIGHT, padx=10, pady=10)
 
+    # Bind Enter key to the button as well as the entry_message field
+    entry_message.bind("<Return>", lambda event: on_enter(event, client_socket, entry_message, chat_area, server_ip, server_port))
+    button_send.bind("<Return>", lambda event: on_enter(event, client_socket, entry_message, chat_area, server_ip, server_port))
+
     server_ip = simpledialog.askstring("Server IP", "Enter the server IP address:")
     server_port = int(simpledialog.askstring("Server Port", "Enter the server port:"))
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -104,16 +106,21 @@ def start_client():
         return
 
     client_socket.sendto(password.encode(), (server_ip, server_port))
-    
     response, _ = client_socket.recvfrom(1024)
     if "Password accepted" in response.decode():
-        username = simpledialog.askstring("Username", "Enter your username:")
-        if not username:
-            messagebox.showerror("Error", "Username cannot be empty!")
-            return
-        client_socket.sendto(username.encode(), (server_ip, server_port))
+        while True:
+            username = simpledialog.askstring("Username", "Enter your username:")
+            if not username:
+                messagebox.showerror("Error", "Username cannot be empty!")
+                continue
 
-        entry_message.bind("<Return>", lambda event: on_enter(event, client_socket, entry_message, chat_area, server_ip, server_port))
+            # Send the proposed username to the server for validation
+            client_socket.sendto(username.encode(), (server_ip, server_port))
+            response, _ = client_socket.recvfrom(1024)
+            if "Username accepted" in response.decode():
+                break
+            else:
+                messagebox.showerror("Error", response.decode())
 
         threading.Thread(target=receive_messages, args=(client_socket, chat_area), daemon=True).start()
         root.mainloop()
