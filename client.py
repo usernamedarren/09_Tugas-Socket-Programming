@@ -65,9 +65,10 @@ def send_message(client_socket, entry_message, chat_area, server_ip, server_port
     if message.strip().lower() == "exit":
         client_socket.close()
         return
-    client_socket.sendto(message.encode(), (server_ip, server_port))
-    create_message_bubble(chat_area, "You", message, align_right=False)
-    entry_message.delete(0, tk.END)
+    if message.strip():
+        client_socket.sendto(message.encode(), (server_ip, server_port))
+        create_message_bubble(chat_area, "You", message, align_right=False)
+        entry_message.delete(0, tk.END)
 
 def start_client():
     root = tk.Tk()
