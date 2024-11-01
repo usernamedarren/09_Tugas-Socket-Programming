@@ -2,6 +2,7 @@ import socket
 import threading
 import tkinter as tk
 from tkinter import messagebox
+from storage import Storage
 
 # Global variables
 clients = {}
@@ -9,9 +10,10 @@ server_password = ""
 server_socket = None
 server_thread = None
 is_server_running = False
+current_room = "default"  # Add this line to define the current room
 
 def handle_client():
-    global server_socket
+    global server_socket, current_room
     while is_server_running:
         try:
             message, client_address = server_socket.recvfrom(1024)
@@ -22,6 +24,10 @@ def handle_client():
                 for client in clients:
                     if client != client_address:
                         server_socket.sendto(f"{clients[client_address]}: {decoded_message}".encode(), client)
+                
+                # Save message to chat history using Storage class
+                Storage.save_message(current_room, clients[client_address], decoded_message)
+                
                 update_chat_area(f"Message from {clients[client_address]}: {decoded_message}")
             else:
                 # First message must be the password, otherwise ignore the client
@@ -46,6 +52,9 @@ def handle_client():
                             for client in clients:
                                 if client != client_address:
                                     server_socket.sendto(broadcast_message.encode(), client)
+                            
+                            # Save join message to chat history using Storage class
+                            Storage.save_message(current_room, "System", broadcast_message)
                             break
                 else:
                     server_socket.sendto("Incorrect password, connection denied.".encode(), client_address)
@@ -101,6 +110,12 @@ def start_server():
 
     start_server_thread(ip, port, password)
 
+def load_chat_history_to_ui():
+    """Load previous chat history into the chat area."""
+    chat_history = Storage.load_messages(current_room)
+    for entry in chat_history:
+        update_chat_area(f"{entry[1]}: {entry[2]}")
+
 def create_server_gui():
     global entry_ip, entry_port, entry_password, chat_area, button_start, button_stop
 
@@ -146,6 +161,9 @@ def create_server_gui():
     chat_area = tk.Text(root, wrap=tk.WORD, font=("Helvetica", 12), bg="#ECE5DD")
     chat_area.config(state=tk.DISABLED)
     chat_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
+    # Load previous chat history
+    load_chat_history_to_ui()
 
     root.mainloop()
 

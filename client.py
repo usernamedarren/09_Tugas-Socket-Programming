@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox
 import socket
 import threading
+from storage import Storage
+
+current_room = "default"
 
 def create_message_bubble(chat_area, username, message, align_right=False):
     username_label = tk.Label(
@@ -30,6 +33,20 @@ def create_message_bubble(chat_area, username, message, align_right=False):
     chat_area.insert(tk.END, '\n')
     chat_area.config(state=tk.DISABLED)
     chat_area.yview(tk.END)
+
+def update_chat_area(message):
+    global chat_area
+    chat_area.config(state=tk.NORMAL)
+    chat_area.insert(tk.END, f"\n{message}\n")
+    chat_area.config(state=tk.DISABLED)
+    chat_area.yview(tk.END)
+
+def load_chat_history_to_ui(chat_area):
+    """Load previous chat history into the chat area before user joins."""
+    chat_history = Storage.load_messages(current_room)
+    for entry in chat_history:
+        username, message = entry[1], entry[2]
+        create_message_bubble(chat_area, username, message)
 
 def receive_messages(client_socket, chat_area):
     while True:
@@ -81,6 +98,9 @@ def start_client():
     chat_area = tk.Text(root, wrap=tk.WORD, font=("Helvetica", 12), bg="#ECE5DD")
     chat_area.config(state=tk.DISABLED)
     chat_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
+    # Load chat history before showing messages of the current session
+    load_chat_history_to_ui(chat_area)
 
     bottom_frame = tk.Frame(root, bg="#FFFFFF", height=50)
     bottom_frame.pack(fill=tk.X, side=tk.BOTTOM)
